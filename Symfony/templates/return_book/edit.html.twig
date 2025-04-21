@@ -1,0 +1,13 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Edit ReturnBook{% endblock %}
+
+{% block body %}
+    <h1>Edit ReturnBook</h1>
+
+    {{ include('return_book/_form.html.twig', {'button_label': 'Update'}) }}
+
+    <a href="{{ path('app_return_book_index') }}">back to list</a>
+
+    {{ include('return_book/_delete_form.html.twig') }}
+{% endblock %}

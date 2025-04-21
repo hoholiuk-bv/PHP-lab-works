@@ -1,0 +1,26 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}ReturnBook{% endblock %}
+
+{% block body %}
+    <h1>ReturnBook</h1>
+
+    <table class="table">
+        <tbody>
+            <tr>
+                <th>Id</th>
+                <td>{{ return_book.id }}</td>
+            </tr>
+            <tr>
+                <th>ReturnDate</th>
+                <td>{{ return_book.returnDate ? return_book.returnDate|date('Y-m-d H:i:s') : '' }}</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <a href="{{ path('app_return_book_index') }}">back to list</a>
+
+    <a href="{{ path('app_return_book_edit', {'id': return_book.id}) }}">edit</a>
+
+    {{ include('return_book/_delete_form.html.twig') }}
+{% endblock %}
