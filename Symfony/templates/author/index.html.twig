@@ -5,13 +5,25 @@
 {% block body %}
     <h1>Author index</h1>
 
+    <form method="get">
+        <input type="text" name="name" value="{{ name_filter }}" placeholder="Filter by name" />
+        <button type="submit">Filter</button>
+    </form>
+
+    <form method="get">
+        <label for="limit">Items per page:</label>
+        <input type="number" name="limit" id="limit" value="{{ limit }}" min="1" placeholder="10" />
+        <input type="hidden" name="name" value="{{ name_filter }}" /> <!-- зберігаємо фільтр по імені -->
+        <button type="submit">Set</button>
+    </form>
+
     <table class="table">
         <thead>
-            <tr>
-                <th>Id</th>
-                <th>Name</th>
-                <th>actions</th>
-            </tr>
+        <tr>
+            <th>Id</th>
+            <th>Name</th>
+            <th>Actions</th>
+        </tr>
         </thead>
         <tbody>
         {% for author in authors %}
@@ -19,17 +31,29 @@
                 <td>{{ author.id }}</td>
                 <td>{{ author.name }}</td>
                 <td>
-                    <a href="{{ path('app_author_show', {'id': author.id}) }}">show</a>
-                    <a href="{{ path('app_author_edit', {'id': author.id}) }}">edit</a>
+                    <a href="{{ path('app_author_show', {'id': author.id}) }}">Show</a>
+                    <a href="{{ path('app_author_edit', {'id': author.id}) }}">Edit</a>
                 </td>
             </tr>
         {% else %}
             <tr>
-                <td colspan="3">no records found</td>
+                <td colspan="3">No records found</td>
             </tr>
         {% endfor %}
         </tbody>
     </table>
+
+    <div>
+        <p>Page {{ currentPage }} of {{ totalPages }} ({{ totalCount }} authors)</p>
+
+        {% if currentPage > 1 %}
+            <a href="{{ path('app_author_index', {'page': currentPage - 1, 'limit': limit, 'name': name_filter}) }}">Previous</a>
+        {% endif %}
+
+        {% if currentPage < totalPages %}
+            <a href="{{ path('app_author_index', {'page': currentPage + 1, 'limit': limit, 'name': name_filter}) }}">Next</a>
+        {% endif %}
+    </div>
 
     <a href="{{ path('app_author_new') }}">Create new</a>
 {% endblock %}

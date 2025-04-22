@@ -14,10 +14,57 @@ use Symfony\Component\Routing\Attribute\Route;
 #[Route('/loan')]
 final class LoanController extends AbstractController{
     #[Route(name: 'app_loan_index', methods: ['GET'])]
-    public function index(LoanRepository $loanRepository): Response
+    public function index(Request $request, LoanRepository $loanRepository): Response
     {
+        // Отримуємо параметри з запиту
+        $loanDateFrom = $request->query->get('loanDateFrom', '');
+        $loanDateTo = $request->query->get('loanDateTo', '');
+        $limit = $request->query->getInt('limit', 10); // Кількість елементів на сторінці
+        $page = $request->query->getInt('page', 1); // Поточна сторінка
+
+        // Запит для фільтрації за loanDate
+        $queryBuilder = $loanRepository->createQueryBuilder('l');
+
+        // Додати фільтрацію за loanDate (з - по)
+        if ($loanDateFrom) {
+            $queryBuilder->andWhere('l.loanDate >= :loanDateFrom')
+                ->setParameter('loanDateFrom', new \DateTime($loanDateFrom));
+        }
+
+        if ($loanDateTo) {
+            $queryBuilder->andWhere('l.loanDate <= :loanDateTo')
+                ->setParameter('loanDateTo', new \DateTime($loanDateTo));
+        }
+
+        // Пагінація
+        $queryBuilder->setFirstResult(($page - 1) * $limit)
+            ->setMaxResults($limit);
+
+        $loans = $queryBuilder->getQuery()->getResult();
+
+        // Загальна кількість записів для пагінації (без фільтрації)
+        $totalLoansQuery = $loanRepository->createQueryBuilder('l');
+        if ($loanDateFrom) {
+            $totalLoansQuery->andWhere('l.loanDate >= :loanDateFrom')
+                ->setParameter('loanDateFrom', new \DateTime($loanDateFrom));
+        }
+
+        if ($loanDateTo) {
+            $totalLoansQuery->andWhere('l.loanDate <= :loanDateTo')
+                ->setParameter('loanDateTo', new \DateTime($loanDateTo));
+        }
+
+        $totalLoans = $totalLoansQuery->select('COUNT(l.id)')->getQuery()->getSingleScalarResult();
+        $totalPages = ceil($totalLoans / $limit);
+
         return $this->render('loan/index.html.twig', [
-            'loans' => $loanRepository->findAll(),
+            'loans' => $loans,
+            'loanDateFrom_filter' => $loanDateFrom,
+            'loanDateTo_filter' => $loanDateTo,
+            'limit' => $limit,
+            'currentPage' => $page,
+            'totalPages' => $totalPages,
+            'totalCount' => $totalLoans,
         ]);
     }
 

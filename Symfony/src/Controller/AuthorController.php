@@ -9,15 +9,57 @@ use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Routing\Annotation\Route;
 
 #[Route('/author')]
 final class AuthorController extends AbstractController{
     #[Route(name: 'app_author_index', methods: ['GET'])]
-    public function index(AuthorRepository $authorRepository): Response
+    public function index(Request $request, AuthorRepository $authorRepository): Response
     {
+        // Отримуємо фільтрр
+        $nameFilter = $request->query->get('name', '');
+
+        // Номер сторінки з запиту (за замовчуванням 1)
+        $page = $request->query->getInt('page', 1);
+
+        // Кількість елементів на сторінці з запиту (за замовчуванням 10, перевіряємо чи це коректне число)
+        $limit = $request->query->getInt('limit', 10);
+        if ($limit <= 0) {
+            $limit = 10; // Встановлюємо значення за замовчуванням, якщо введено неправильне
+        }
+
+        // Обчислюємо кількість пропущених записів для пагінації
+        $offset = ($page - 1) * $limit;
+
+        // Створюємо запит для фільтрації та пагінації
+        $queryBuilder = $authorRepository->createQueryBuilder('a')
+            ->where('a.name LIKE :name')
+            ->setParameter('name', '%' . $nameFilter . '%')
+            ->orderBy('a.name', 'ASC')
+            ->setFirstResult($offset) // Встановлюємо початок результатів
+            ->setMaxResults($limit); // Встановлюємо кількість елементів на сторінці
+
+        // Отримуємо авторів для поточної сторінки
+        $authors = $queryBuilder->getQuery()->getResult();
+
+        // Підрахунок загальної кількості записів (для обчислення кількості сторінок)
+        $totalCount = $authorRepository->createQueryBuilder('a')
+            ->select('count(a.id)')
+            ->where('a.name LIKE :name')
+            ->setParameter('name', '%' . $nameFilter . '%')
+            ->getQuery()
+            ->getSingleScalarResult();
+
+        // Кількість сторінок
+        $totalPages = ceil($totalCount / $limit);
+
         return $this->render('author/index.html.twig', [
-            'authors' => $authorRepository->findAll(),
+            'authors' => $authors,
+            'name_filter' => $nameFilter, // Фільтр для форми
+            'currentPage' => $page,
+            'totalPages' => $totalPages,
+            'totalCount' => $totalCount,
+            'limit' => $limit,
         ]);
     }
 

@@ -5,14 +5,28 @@
 {% block body %}
     <h1>Book index</h1>
 
+    <form method="get">
+        <input type="text" name="title" value="{{ title_filter }}" placeholder="Filter by Title" />
+        <input type="text" name="isbn" value="{{ isbn_filter }}" placeholder="Filter by ISBN" />
+        <button type="submit">Filter</button>
+    </form>
+
+    <form method="get">
+        <label for="limit">Items per page:</label>
+        <input type="number" name="limit" id="limit" value="{{ limit }}" min="1" placeholder="10" />
+        <input type="hidden" name="title" value="{{ title_filter }}" /> <!-- зберігаємо фільтри -->
+        <input type="hidden" name="isbn" value="{{ isbn_filter }}" />
+        <button type="submit">Set</button>
+    </form>
+
     <table class="table">
         <thead>
-            <tr>
-                <th>Id</th>
-                <th>Title</th>
-                <th>Isbn</th>
-                <th>actions</th>
-            </tr>
+        <tr>
+            <th>Id</th>
+            <th>Title</th>
+            <th>Isbn</th>
+            <th>Actions</th>
+        </tr>
         </thead>
         <tbody>
         {% for book in books %}
@@ -21,17 +35,29 @@
                 <td>{{ book.title }}</td>
                 <td>{{ book.isbn }}</td>
                 <td>
-                    <a href="{{ path('app_book_show', {'id': book.id}) }}">show</a>
-                    <a href="{{ path('app_book_edit', {'id': book.id}) }}">edit</a>
+                    <a href="{{ path('app_book_show', {'id': book.id}) }}">Show</a>
+                    <a href="{{ path('app_book_edit', {'id': book.id}) }}">Edit</a>
                 </td>
             </tr>
         {% else %}
             <tr>
-                <td colspan="4">no records found</td>
+                <td colspan="4">No records found</td>
             </tr>
         {% endfor %}
         </tbody>
     </table>
+
+    <div>
+        <p>Page {{ currentPage }} of {{ totalPages }} ({{ totalCount }} books)</p>
+
+        {% if currentPage > 1 %}
+            <a href="{{ path('app_book_index', {'page': currentPage - 1, 'limit': limit, 'title': title_filter, 'isbn': isbn_filter}) }}">Previous</a>
+        {% endif %}
+
+        {% if currentPage < totalPages %}
+            <a href="{{ path('app_book_index', {'page': currentPage + 1, 'limit': limit, 'title': title_filter, 'isbn': isbn_filter}) }}">Next</a>
+        {% endif %}
+    </div>
 
     <a href="{{ path('app_book_new') }}">Create new</a>
 {% endblock %}

@@ -5,13 +5,26 @@
 {% block body %}
     <h1>ReturnBook index</h1>
 
+    <form method="get">
+        <label for="returnDateFrom">Return Date From (YYYY-MM-DD):</label>
+        <input type="text" name="returnDateFrom" value="{{ returnDateFrom_filter }}" id="returnDateFrom">
+
+        <label for="returnDateTo">Return Date To (YYYY-MM-DD):</label>
+        <input type="text" name="returnDateTo" value="{{ returnDateTo_filter }}" id="returnDateTo">
+
+        <label for="limit">Items per page:</label>
+        <input type="number" name="limit" value="{{ limit }}" id="limit">
+
+        <button type="submit">Filter</button>
+    </form>
+
     <table class="table">
         <thead>
-            <tr>
-                <th>Id</th>
-                <th>ReturnDate</th>
-                <th>actions</th>
-            </tr>
+        <tr>
+            <th>Id</th>
+            <th>ReturnDate</th>
+            <th>Actions</th>
+        </tr>
         </thead>
         <tbody>
         {% for return_book in return_books %}
@@ -25,11 +38,27 @@
             </tr>
         {% else %}
             <tr>
-                <td colspan="3">no records found</td>
+                <td colspan="3">No records found</td>
             </tr>
         {% endfor %}
         </tbody>
     </table>
+
+    <div>
+        <span>Showing {{ return_books|length }} of {{ totalCount }} records</span>
+    </div>
+
+    <div class="pagination">
+        <span>Page {{ currentPage }} of {{ totalPages }}</span>
+
+        {% if currentPage > 1 %}
+            <a href="{{ path('app_return_book_index', {'page': currentPage - 1, 'returnDateFrom': returnDateFrom_filter, 'returnDateTo': returnDateTo_filter, 'limit': limit}) }}">Previous</a>
+        {% endif %}
+
+        {% if currentPage < totalPages %}
+            <a href="{{ path('app_return_book_index', {'page': currentPage + 1, 'returnDateFrom': returnDateFrom_filter, 'returnDateTo': returnDateTo_filter, 'limit': limit}) }}">Next</a>
+        {% endif %}
+    </div>
 
     <a href="{{ path('app_return_book_new') }}">Create new</a>
 {% endblock %}

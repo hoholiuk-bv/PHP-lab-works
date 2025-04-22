@@ -14,10 +14,57 @@ use Symfony\Component\Routing\Attribute\Route;
 #[Route('/book')]
 final class BookController extends AbstractController{
     #[Route(name: 'app_book_index', methods: ['GET'])]
-    public function index(BookRepository $bookRepository): Response
+    public function index(Request $request, BookRepository $bookRepository): Response
     {
+        // Отримуємо параметри з запиту
+        $titleFilter = $request->query->get('title', '');
+        $isbnFilter = $request->query->get('isbn', '');
+        $limit = $request->query->getInt('limit', 10); // кількість елементів на сторінці
+        $page = $request->query->getInt('page', 1); // поточна сторінка
+
+        // Запит для фільтрації та пагінації
+        $queryBuilder = $bookRepository->createQueryBuilder('b');
+
+        // Додамо фільтрацію
+        if ($titleFilter) {
+            $queryBuilder->andWhere('b.title LIKE :title')
+                ->setParameter('title', '%'.$titleFilter.'%');
+        }
+
+        if ($isbnFilter) {
+            $queryBuilder->andWhere('b.isbn LIKE :isbn')
+                ->setParameter('isbn', '%'.$isbnFilter.'%');
+        }
+
+        // Пагінація
+        $queryBuilder->setFirstResult(($page - 1) * $limit)
+            ->setMaxResults($limit);
+
+        $books = $queryBuilder->getQuery()->getResult();
+
+        // Загальна кількість книг для пагінації (без фільтрів)
+        $totalBooksQuery = $bookRepository->createQueryBuilder('b');
+        if ($titleFilter) {
+            $totalBooksQuery->andWhere('b.title LIKE :title')
+                ->setParameter('title', '%'.$titleFilter.'%');
+        }
+        if ($isbnFilter) {
+            $totalBooksQuery->andWhere('b.isbn LIKE :isbn')
+                ->setParameter('isbn', '%'.$isbnFilter.'%');
+        }
+
+        // Загальна кількість записів
+        $totalBooks = $totalBooksQuery->select('COUNT(b.id)')->getQuery()->getSingleScalarResult();
+        $totalPages = ceil($totalBooks / $limit);
+
         return $this->render('book/index.html.twig', [
-            'books' => $bookRepository->findAll(),
+            'books' => $books,
+            'title_filter' => $titleFilter,
+            'isbn_filter' => $isbnFilter,
+            'limit' => $limit,
+            'currentPage' => $page,
+            'totalPages' => $totalPages,
+            'totalCount' => $totalBooks,
         ]);
     }
 

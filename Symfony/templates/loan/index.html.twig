@@ -5,13 +5,26 @@
 {% block body %}
     <h1>Loan index</h1>
 
+    <form method="get">
+        <label for="loanDateFrom">Loan Date From (YYYY-MM-DD):</label>
+        <input type="text" name="loanDateFrom" value="{{ loanDateFrom_filter }}" id="loanDateFrom">
+
+        <label for="loanDateTo">Loan Date To (YYYY-MM-DD):</label>
+        <input type="text" name="loanDateTo" value="{{ loanDateTo_filter }}" id="loanDateTo">
+
+        <label for="limit">Items per page:</label>
+        <input type="number" name="limit" value="{{ limit }}" id="limit">
+
+        <button type="submit">Filter</button>
+    </form>
+
     <table class="table">
         <thead>
-            <tr>
-                <th>Id</th>
-                <th>LoanDate</th>
-                <th>actions</th>
-            </tr>
+        <tr>
+            <th>Id</th>
+            <th>LoanDate</th>
+            <th>Actions</th>
+        </tr>
         </thead>
         <tbody>
         {% for loan in loans %}
@@ -25,11 +38,27 @@
             </tr>
         {% else %}
             <tr>
-                <td colspan="3">no records found</td>
+                <td colspan="3">No records found</td>
             </tr>
         {% endfor %}
         </tbody>
     </table>
+
+    <div>
+        <span>Showing {{ loans|length }} of {{ totalCount }} records</span>
+    </div>
+
+    <div class="pagination">
+        <span>Page {{ currentPage }} of {{ totalPages }}</span>
+
+        {% if currentPage > 1 %}
+            <a href="{{ path('app_loan_index', {'page': currentPage - 1, 'loanDateFrom': loanDateFrom_filter, 'loanDateTo': loanDateTo_filter, 'limit': limit}) }}">Previous</a>
+        {% endif %}
+
+        {% if currentPage < totalPages %}
+            <a href="{{ path('app_loan_index', {'page': currentPage + 1, 'loanDateFrom': loanDateFrom_filter, 'loanDateTo': loanDateTo_filter, 'limit': limit}) }}">Next</a>
+        {% endif %}
+    </div>
 
     <a href="{{ path('app_loan_new') }}">Create new</a>
 {% endblock %}

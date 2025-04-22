@@ -5,14 +5,27 @@
 {% block body %}
     <h1>Reader index</h1>
 
+    <form method="get">
+        <label for="fullName">Full Name:</label>
+        <input type="text" name="fullName" value="{{ fullName_filter }}" id="fullName">
+
+        <label for="email">Email:</label>
+        <input type="text" name="email" value="{{ email_filter }}" id="email">
+
+        <label for="limit">Items per page:</label>
+        <input type="number" name="limit" value="{{ limit }}" id="limit">
+
+        <button type="submit">Filter</button>
+    </form>
+
     <table class="table">
         <thead>
-            <tr>
-                <th>Id</th>
-                <th>FullName</th>
-                <th>Email</th>
-                <th>actions</th>
-            </tr>
+        <tr>
+            <th>Id</th>
+            <th>FullName</th>
+            <th>Email</th>
+            <th>Actions</th>
+        </tr>
         </thead>
         <tbody>
         {% for reader in readers %}
@@ -27,11 +40,27 @@
             </tr>
         {% else %}
             <tr>
-                <td colspan="4">no records found</td>
+                <td colspan="4">No records found</td>
             </tr>
         {% endfor %}
         </tbody>
     </table>
+
+    <div>
+        <span>Showing {{ readers|length }} of {{ totalCount }} records</span>
+    </div>
+
+    <div class="pagination">
+        <span>Page {{ currentPage }} of {{ totalPages }}</span>
+
+        {% if currentPage > 1 %}
+            <a href="{{ path('app_reader_index', {'page': currentPage - 1, 'fullName': fullName_filter, 'email': email_filter, 'limit': limit}) }}">Previous</a>
+        {% endif %}
+
+        {% if currentPage < totalPages %}
+            <a href="{{ path('app_reader_index', {'page': currentPage + 1, 'fullName': fullName_filter, 'email': email_filter, 'limit': limit}) }}">Next</a>
+        {% endif %}
+    </div>
 
     <a href="{{ path('app_reader_new') }}">Create new</a>
 {% endblock %}

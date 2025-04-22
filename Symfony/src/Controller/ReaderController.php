@@ -14,10 +14,58 @@ use Symfony\Component\Routing\Attribute\Route;
 #[Route('/reader')]
 final class ReaderController extends AbstractController{
     #[Route(name: 'app_reader_index', methods: ['GET'])]
-    public function index(ReaderRepository $readerRepository): Response
+    public function index(Request $request, ReaderRepository $readerRepository): Response
     {
+        // Отримуємо параметри з запиту
+        $fullName = $request->query->get('fullName', '');
+        $email = $request->query->get('email', '');
+        $limit = $request->query->getInt('limit', 10); // Кількість елементів на сторінці
+        $page = $request->query->getInt('page', 1); // Поточна сторінка
+
+        // Запит для фільтрації по FullName та Email
+        $queryBuilder = $readerRepository->createQueryBuilder('r');
+
+        // Додати фільтрацію по FullName
+        if ($fullName) {
+            $queryBuilder->andWhere('r.fullName LIKE :fullName')
+                ->setParameter('fullName', '%' . $fullName . '%');
+        }
+
+        // Додати фільтрацію по Email
+        if ($email) {
+            $queryBuilder->andWhere('r.email LIKE :email')
+                ->setParameter('email', '%' . $email . '%');
+        }
+
+        // Пагінація
+        $queryBuilder->setFirstResult(($page - 1) * $limit)
+            ->setMaxResults($limit);
+
+        $readers = $queryBuilder->getQuery()->getResult();
+
+        // Загальна кількість записів для пагінації (без фільтрації)
+        $totalReadersQuery = $readerRepository->createQueryBuilder('r');
+        if ($fullName) {
+            $totalReadersQuery->andWhere('r.fullName LIKE :fullName')
+                ->setParameter('fullName', '%' . $fullName . '%');
+        }
+
+        if ($email) {
+            $totalReadersQuery->andWhere('r.email LIKE :email')
+                ->setParameter('email', '%' . $email . '%');
+        }
+
+        $totalReaders = $totalReadersQuery->select('COUNT(r.id)')->getQuery()->getSingleScalarResult();
+        $totalPages = ceil($totalReaders / $limit);
+
         return $this->render('reader/index.html.twig', [
-            'readers' => $readerRepository->findAll(),
+            'readers' => $readers,
+            'fullName_filter' => $fullName,
+            'email_filter' => $email,
+            'limit' => $limit,
+            'currentPage' => $page,
+            'totalPages' => $totalPages,
+            'totalCount' => $totalReaders,
         ]);
     }
 
