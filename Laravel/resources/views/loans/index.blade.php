@@ -4,31 +4,39 @@
     <div class="container">
         <h1>Loans</h1>
 
-        <form method="GET" action="{{ route('loans.index') }}" class="mb-4">
-            <div class="row g-2">
-                <div class="col">
-                    <select name="book_id" class="form-select">
-                        <option value="">All Books</option>
-                        @foreach($books as $book)
-                            <option value="{{ $book->id }}" {{ request('book_id') == $book->id ? 'selected' : '' }}>
-                                {{ $book->title }}
-                            </option>
-                        @endforeach
-                    </select>
-                </div>
-                <div class="col">
-                    <select name="reader_id" class="form-select">
-                        <option value="">All Readers</option>
-                        @foreach($readers as $reader)
-                            <option value="{{ $reader->id }}" {{ request('reader_id') == $reader->id ? 'selected' : '' }}>
-                                {{ $reader->full_name }}
-                            </option>
-                        @endforeach
-                    </select>
-                </div>
-                <div class="col-auto">
-                    <button type="submit" class="btn btn-primary">Filter</button>
-                </div>
+        <form method="GET" action="{{ route('loans.index') }}">
+            <div>
+                <label for="book_id">Book</label>
+                <select name="book_id">
+                    <option value="">Select a book</option>
+                    @foreach ($books as $book)
+                        <option value="{{ $book->id }}" {{ request('book_id') == $book->id ? 'selected' : '' }}>{{ $book->title }}</option>
+                    @endforeach
+                </select>
+            </div>
+
+            <div>
+                <label for="reader_id">Reader</label>
+                <select name="reader_id">
+                    <option value="">Select a reader</option>
+                    @foreach ($readers as $reader)
+                        <option value="{{ $reader->id }}" {{ request('reader_id') == $reader->id ? 'selected' : '' }}>{{ $reader->full_name }}</option>
+                    @endforeach
+                </select>
+            </div>
+
+            <div>
+                <label for="loan_date_from">Loan Date From</label>
+                <input type="date" name="loan_date_from" value="{{ request('loan_date_from') }}">
+            </div>
+
+            <div>
+                <label for="loan_date_to">Loan Date To</label>
+                <input type="date" name="loan_date_to" value="{{ request('loan_date_to') }}">
+            </div>
+
+            <div>
+                <button type="submit">Search</button>
             </div>
         </form>
 

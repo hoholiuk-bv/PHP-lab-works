@@ -20,10 +20,16 @@ class BookController extends Controller
             $query->where('isbn', 'like', '%' . $request->isbn . '%');
         }
 
+        if ($request->filled('author_id')) {
+            $query->where('author_id', $request->author_id);
+        }
+
         $itemsPerPage = $request->get('itemsPerPage', 10);
         $books = $query->paginate($itemsPerPage);
 
-        return view('books.index', compact('books'));
+        $authors = Author::all();
+
+        return view('books.index', compact('books', 'authors'));
     }
 
     public function create()

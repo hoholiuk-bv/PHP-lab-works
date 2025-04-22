@@ -21,6 +21,14 @@ class LoanController extends Controller
             $query->where('reader_id', $request->reader_id);
         }
 
+        if ($request->filled('loan_date_from')) {
+            $query->where('loan_date', '>=', $request->loan_date_from);
+        }
+
+        if ($request->filled('loan_date_to')) {
+            $query->where('loan_date', '<=', $request->loan_date_to);
+        }
+
         $itemsPerPage = $request->get('itemsPerPage', 10);
         $loans = $query->paginate($itemsPerPage);
 

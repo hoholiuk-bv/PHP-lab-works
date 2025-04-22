@@ -1,6 +1,15 @@
 @extends('layouts.app')
 
 @section('content')
+
+    <form method="GET" action="{{ route('returns.index') }}" class="mb-3">
+        <input type="number" name="loan_id" value="{{ request('loan_id') }}" class="form-control" placeholder="Filter by Loan ID" />
+        <input type="date" name="return_date_from" value="{{ request('return_date_from') }}" class="form-control" placeholder="Filter by Return Date From" />
+        <input type="date" name="return_date_to" value="{{ request('return_date_to') }}" class="form-control" placeholder="Filter by Return Date To" />
+        <input type="number" name="itemsPerPage" value="{{ request('itemsPerPage', 10) }}" min="1" style="width:100px;">
+        <button type="submit" class="btn btn-sm btn-secondary">Filter</button>
+    </form>
+
     <div class="d-flex justify-content-between align-items-center mb-3">
         <h1>Returned Books</h1>
         <a href="{{ route('returns.create') }}" class="btn btn-primary">Register Return</a>
@@ -37,5 +46,7 @@
         </tbody>
     </table>
 
-    {{ $returnBooks->links() }}
+    <div class="d-flex justify-content-center">
+        {{ $returnBooks->appends(request()->query())->links() }}
+    </div>
 @endsection

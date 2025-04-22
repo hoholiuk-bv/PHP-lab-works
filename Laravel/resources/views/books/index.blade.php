@@ -8,6 +8,14 @@
     <form method="GET" action="{{ route('books.index') }}" class="mb-3">
         <input type="text" name="title" placeholder="Filter by title" value="{{ request('title') }}">
         <input type="text" name="isbn" placeholder="Filter by ISBN" value="{{ request('isbn') }}">
+        <select name="author_id">
+            <option value="">Select Author</option>
+            @foreach($authors as $author)
+                <option value="{{ $author->id }}" {{ request('author_id') == $author->id ? 'selected' : '' }}>
+                    {{ $author->name }}
+                </option>
+            @endforeach
+        </select>
         <input type="number" name="itemsPerPage" value="{{ request('itemsPerPage', 10) }}" min="1" style="width:100px;">
         <button type="submit" class="btn btn-sm btn-secondary">Filter</button>
     </form>

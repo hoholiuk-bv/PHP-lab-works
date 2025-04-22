@@ -7,9 +7,21 @@ use Illuminate\Http\Request;
 
 class ReaderController extends Controller
 {
-    public function index()
+    public function index(Request $request)
     {
-        $readers = Reader::paginate(10);
+        $query = Reader::query();
+
+        if ($request->filled('full_name')) {
+            $query->where('full_name', 'like', '%' . $request->full_name . '%');
+        }
+
+        if ($request->filled('email')) {
+            $query->where('email', 'like', '%' . $request->email . '%');
+        }
+
+        $itemsPerPage = $request->get('itemsPerPage', 10);
+        $readers = $query->paginate($itemsPerPage);
+
         return view('readers.index', compact('readers'));
     }
 

@@ -16,8 +16,17 @@ class ReturnBookController extends Controller
             $query->where('loan_id', $request->loan_id);
         }
 
+        if ($request->filled('return_date_from')) {
+            $query->where('return_date', '>=', $request->return_date_from);
+        }
+
+        if ($request->filled('return_date_to')) {
+            $query->where('return_date', '<=', $request->return_date_to);
+        }
+
         $itemsPerPage = $request->get('itemsPerPage', 10);
         $returnBooks = $query->paginate($itemsPerPage);
+
         $loans = Loan::all();
 
         return view('returns.index', compact('returnBooks', 'loans'));
