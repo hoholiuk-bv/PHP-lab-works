@@ -12,6 +12,19 @@ security:
         main:
             lazy: true
             provider: users_in_memory
+            form_login:
+                login_path: app_login
+                check_path: app_login
+                enable_csrf: true
+#                default_target_path: app_home
+            logout:
+                path: app_logout
+                target: app_login
+        api:
+            pattern: ^/api
+            stateless: true
+            provider: users_in_memory
+            jwt: ~
 
             # activate different ways to authenticate
             # https://symfony.com/doc/current/security.html#the-firewall
@@ -22,8 +35,18 @@ security:
     # Easy way to control access for large sections of your site
     # Note: Only the *first* access control that matches will be used
     access_control:
-        # - { path: ^/admin, roles: ROLE_ADMIN }
-        # - { path: ^/profile, roles: ROLE_USER }
+        - { path: ^/, roles: IS_AUTHENTICATED_ANONYMOUSLY }
+        - { path: ^/login, roles: IS_AUTHENTICATED_ANONYMOUSLY }
+        - { path: ^/register, roles: IS_AUTHENTICATED_ANONYMOUSLY }
+        - { path: ^/book, roles: IS_AUTHENTICATED_FULLY }
+        - { path: ^/author, roles: IS_AUTHENTICATED_FULLY }
+        - { path: ^/loan, roles: IS_AUTHENTICATED_FULLY }
+        - { path: ^/reader, roles: IS_AUTHENTICATED_FULLY }
+        - { path: ^/return, roles: IS_AUTHENTICATED_FULLY }
+    role_hierarchy:
+        ROLE_CLIENT: ROLE_CLIENT
+        ROLE_MANAGER: ROLE_MANAGER
+        ROLE_ADMIN: ROLE_ADMIN
 
 when@test:
     security:

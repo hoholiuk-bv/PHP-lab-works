@@ -10,10 +10,12 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 #[Route('/reader')]
 final class ReaderController extends AbstractController{
     #[Route(name: 'app_reader_index', methods: ['GET'])]
+    #[IsGranted('ROLE_CLIENT')]
     public function index(Request $request, ReaderRepository $readerRepository): Response
     {
         // Отримуємо параметри з запиту
@@ -70,6 +72,7 @@ final class ReaderController extends AbstractController{
     }
 
     #[Route('/new', name: 'app_reader_new', methods: ['GET', 'POST'])]
+    #[IsGranted('ROLE_MANAGER')]
     public function new(Request $request, EntityManagerInterface $entityManager): Response
     {
         $reader = new Reader();
@@ -90,6 +93,7 @@ final class ReaderController extends AbstractController{
     }
 
     #[Route('/{id}', name: 'app_reader_show', methods: ['GET'])]
+    #[IsGranted('ROLE_CLIENT')]
     public function show(Reader $reader): Response
     {
         return $this->render('reader/show.html.twig', [
@@ -98,6 +102,7 @@ final class ReaderController extends AbstractController{
     }
 
     #[Route('/{id}/edit', name: 'app_reader_edit', methods: ['GET', 'POST'])]
+    #[IsGranted('ROLE_MANAGER')]
     public function edit(Request $request, Reader $reader, EntityManagerInterface $entityManager): Response
     {
         $form = $this->createForm(ReaderType::class, $reader);
@@ -116,6 +121,7 @@ final class ReaderController extends AbstractController{
     }
 
     #[Route('/{id}', name: 'app_reader_delete', methods: ['POST'])]
+    #[IsGranted('ROLE_ADMIN')]
     public function delete(Request $request, Reader $reader, EntityManagerInterface $entityManager): Response
     {
         if ($this->isCsrfTokenValid('delete'.$reader->getId(), $request->getPayload()->getString('_token'))) {

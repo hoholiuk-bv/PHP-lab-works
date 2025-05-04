@@ -10,10 +10,12 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 #[Route('/book')]
 final class BookController extends AbstractController{
     #[Route(name: 'app_book_index', methods: ['GET'])]
+    #[IsGranted('ROLE_CLIENT')]
     public function index(Request $request, BookRepository $bookRepository): Response
     {
         // Отримуємо параметри з запиту
@@ -69,6 +71,7 @@ final class BookController extends AbstractController{
     }
 
     #[Route('/new', name: 'app_book_new', methods: ['GET', 'POST'])]
+    #[IsGranted('ROLE_MANAGER')]
     public function new(Request $request, EntityManagerInterface $entityManager): Response
     {
         $book = new Book();
@@ -89,6 +92,7 @@ final class BookController extends AbstractController{
     }
 
     #[Route('/{id}', name: 'app_book_show', methods: ['GET'])]
+    #[IsGranted('ROLE_CLIENT')]
     public function show(Book $book): Response
     {
         return $this->render('book/show.html.twig', [
@@ -97,6 +101,7 @@ final class BookController extends AbstractController{
     }
 
     #[Route('/{id}/edit', name: 'app_book_edit', methods: ['GET', 'POST'])]
+    #[IsGranted('ROLE_MANAGER')]
     public function edit(Request $request, Book $book, EntityManagerInterface $entityManager): Response
     {
         $form = $this->createForm(BookType::class, $book);
@@ -115,6 +120,7 @@ final class BookController extends AbstractController{
     }
 
     #[Route('/{id}', name: 'app_book_delete', methods: ['POST'])]
+    #[IsGranted('ROLE_ADMIN')]
     public function delete(Request $request, Book $book, EntityManagerInterface $entityManager): Response
     {
         if ($this->isCsrfTokenValid('delete'.$book->getId(), $request->getPayload()->getString('_token'))) {

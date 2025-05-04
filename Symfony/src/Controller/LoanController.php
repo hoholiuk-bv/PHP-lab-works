@@ -10,10 +10,12 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 #[Route('/loan')]
 final class LoanController extends AbstractController{
     #[Route(name: 'app_loan_index', methods: ['GET'])]
+    #[IsGranted('ROLE_CLIENT')]
     public function index(Request $request, LoanRepository $loanRepository): Response
     {
         // Отримуємо параметри з запиту
@@ -69,6 +71,7 @@ final class LoanController extends AbstractController{
     }
 
     #[Route('/new', name: 'app_loan_new', methods: ['GET', 'POST'])]
+    #[IsGranted('ROLE_MANAGER')]
     public function new(Request $request, EntityManagerInterface $entityManager): Response
     {
         $loan = new Loan();
@@ -89,6 +92,7 @@ final class LoanController extends AbstractController{
     }
 
     #[Route('/{id}', name: 'app_loan_show', methods: ['GET'])]
+    #[IsGranted('ROLE_CLIENT')]
     public function show(Loan $loan): Response
     {
         return $this->render('loan/show.html.twig', [
@@ -97,6 +101,7 @@ final class LoanController extends AbstractController{
     }
 
     #[Route('/{id}/edit', name: 'app_loan_edit', methods: ['GET', 'POST'])]
+    #[IsGranted('ROLE_MANAGER')]
     public function edit(Request $request, Loan $loan, EntityManagerInterface $entityManager): Response
     {
         $form = $this->createForm(LoanType::class, $loan);
@@ -115,6 +120,7 @@ final class LoanController extends AbstractController{
     }
 
     #[Route('/{id}', name: 'app_loan_delete', methods: ['POST'])]
+    #[IsGranted('ROLE_ADMIN')]
     public function delete(Request $request, Loan $loan, EntityManagerInterface $entityManager): Response
     {
         if ($this->isCsrfTokenValid('delete'.$loan->getId(), $request->getPayload()->getString('_token'))) {

@@ -10,10 +10,12 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
+use Symfony\Component\Security\Http\Attribute\IsGranted;
 
 #[Route('/author')]
 final class AuthorController extends AbstractController{
     #[Route(name: 'app_author_index', methods: ['GET'])]
+    #[IsGranted('ROLE_CLIENT')]
     public function index(Request $request, AuthorRepository $authorRepository): Response
     {
         // Отримуємо фільтрр
@@ -64,6 +66,7 @@ final class AuthorController extends AbstractController{
     }
 
     #[Route('/new', name: 'app_author_new', methods: ['GET', 'POST'])]
+    #[IsGranted('ROLE_MANAGER')]
     public function new(Request $request, EntityManagerInterface $entityManager): Response
     {
         $author = new Author();
@@ -84,6 +87,7 @@ final class AuthorController extends AbstractController{
     }
 
     #[Route('/{id}', name: 'app_author_show', methods: ['GET'])]
+    #[IsGranted('ROLE_CLIENT')]
     public function show(Author $author): Response
     {
         return $this->render('author/show.html.twig', [
@@ -92,6 +96,7 @@ final class AuthorController extends AbstractController{
     }
 
     #[Route('/{id}/edit', name: 'app_author_edit', methods: ['GET', 'POST'])]
+    #[IsGranted('ROLE_MANAGER')]
     public function edit(Request $request, Author $author, EntityManagerInterface $entityManager): Response
     {
         $form = $this->createForm(AuthorType::class, $author);
@@ -110,6 +115,7 @@ final class AuthorController extends AbstractController{
     }
 
     #[Route('/{id}', name: 'app_author_delete', methods: ['POST'])]
+    #[IsGranted('ROLE_ADMIN')]
     public function delete(Request $request, Author $author, EntityManagerInterface $entityManager): Response
     {
         if ($this->isCsrfTokenValid('delete'.$author->getId(), $request->getPayload()->getString('_token'))) {
